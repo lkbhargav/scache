@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	humanize "github.com/dustin/go-humanize"
 )
 
 const extension string = ".scache"
@@ -21,9 +23,10 @@ type cacheValueHolder struct {
 }
 
 type responseFile struct {
-	ExpiryHuman    string
-	ExpiryInMiilis int64
-	SizeInBytes    int64
+	ExpiryHumanReadable string `json:"expiryHumanReadable"`
+	ExpiryInMiilis      int64  `json:"expiryInMillis"`
+	SizeInBytes         int64  `json:"sizeInBytes"`
+	SizeHumanReadable   string `json:"sizeHumanReadable"`
 }
 
 // Object => holds the state information
@@ -125,9 +128,10 @@ func (obj Object) ListOfActiveKeys() (resp map[string]responseFile, err error) {
 			return
 		}
 		resp[key] = responseFile{
-			ExpiryHuman:    value.Expiry.Format("Jan _2 15:04:05"),
-			ExpiryInMiilis: value.Expiry.UnixNano() / int64(time.Millisecond),
-			SizeInBytes:    info.Size(),
+			ExpiryHumanReadable: value.Expiry.Format("Mon, 02 Jan 2006 15:04:05 MST"),
+			ExpiryInMiilis:      value.Expiry.UnixNano() / int64(time.Millisecond),
+			SizeInBytes:         info.Size(),
+			SizeHumanReadable:   humanize.Bytes(uint64(info.Size())),
 		}
 	}
 	return
