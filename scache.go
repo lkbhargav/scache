@@ -20,6 +20,12 @@ type cacheValueHolder struct {
 	Channel chan bool
 }
 
+type responseFile struct {
+	ExpiryHuman    string
+	ExpiryInMiilis int64
+	SizeInBytes    int64
+}
+
 // Object => holds the state information
 type Object struct {
 	scacheKeys map[string]cacheValueHolder
@@ -107,6 +113,24 @@ func (obj Object) Flush() {
 	for key := range obj.scacheKeys {
 		obj.Remove(key)
 	}
+}
+
+// ListOfActiveKeys => gets us all unexpired keys thus exposing the files
+func (obj Object) ListOfActiveKeys() (resp map[string]responseFile, err error) {
+	resp = make(map[string]responseFile)
+	var info os.FileInfo
+	for key, value := range obj.scacheKeys {
+		info, err = os.Stat(getFilePath(obj, key))
+		if err != nil {
+			return
+		}
+		resp[key] = responseFile{
+			ExpiryHuman:    value.Expiry.Format("Jan _2 15:04:05"),
+			ExpiryInMiilis: value.Expiry.UnixNano() / int64(time.Millisecond),
+			SizeInBytes:    info.Size(),
+		}
+	}
+	return
 }
 
 func randomPrefix(n int) string {

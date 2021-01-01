@@ -1,6 +1,7 @@
 package scache
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -138,5 +139,24 @@ func TestForSettingDuplicateKeysAndGet(t *testing.T) {
 
 	if err != nil || val == "" {
 		t.Errorf("Expected value: %v, while we got %v; Expected error: %v, while we got %v", "Bhargav", val, nil, err)
+	}
+}
+
+func TestForGettingAllKeysReturned(t *testing.T) {
+	defer obj.Flush()
+
+	obj.Set("name", []byte("Bhargav"), 10*time.Second)
+	obj.Set("something", []byte("something"), 5*time.Second)
+
+	keys, err := obj.ListOfActiveKeys()
+
+	fmt.Println(keys, err)
+
+	if err != nil {
+		t.Errorf("Error trying to generate a list, %v", err)
+	}
+
+	if len(keys) != 2 {
+		t.Errorf("Invalid number of keys, expected to see 2 but we got %v", len(keys))
 	}
 }
