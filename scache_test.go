@@ -6,9 +6,11 @@ import (
 )
 
 var obj Object
+var obj2 Object
 
 func init() {
-	obj = Init()
+	obj = Init("/Users/lkbhargav/Desktop")
+	obj2 = Init("")
 }
 
 func TestForBasicSet(t *testing.T) {
@@ -106,6 +108,19 @@ func TestForLongDurationKeys(t *testing.T) {
 	time.Sleep(8 * time.Second)
 
 	val, err := obj.Get("name")
+
+	if err != nil || val == "" {
+		t.Errorf("Expected value: %v, while we got %v; Expected error: %v, while we got %v", "Bhargav", val, nil, err)
+	}
+}
+
+func TestForDefaultPaths(t *testing.T) {
+	defer obj2.Flush()
+	obj2.Set("name", []byte("Bhargav"), 5*time.Second)
+
+	time.Sleep(3 * time.Second)
+
+	val, err := obj2.Get("name")
 
 	if err != nil || val == "" {
 		t.Errorf("Expected value: %v, while we got %v; Expected error: %v, while we got %v", "Bhargav", val, nil, err)
